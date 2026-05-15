@@ -1,10 +1,36 @@
 import socket
 import json
+import struct
 import crypto_utils
-import time
 
 HOST = '127.0.0.1'
 PORT = 65432
+
+# ---------------------------------------------------------------------------
+# Framed I/O helpers (mirrors server.py)
+# ---------------------------------------------------------------------------
+
+def send_msg(sock, data: bytes):
+    """Send data preceded by a 4-byte length header."""
+    sock.sendall(struct.pack('>I', len(data)) + data)
+
+def recv_msg(sock) -> bytes:
+    """Receive a complete framed message, blocking until all bytes arrive."""
+    raw_len = _recv_exact(sock, 4)
+    msg_len = struct.unpack('>I', raw_len)[0]
+    return _recv_exact(sock, msg_len)
+
+def _recv_exact(sock, n: int) -> bytes:
+    """Read exactly n bytes from sock, raising ConnectionError on short read."""
+    buf = bytearray()
+    while len(buf) < n:
+        chunk = sock.recv(n - len(buf))
+        if not chunk:
+            raise ConnectionError("Socket closed before all bytes were received.")
+        buf.extend(chunk)
+    return bytes(buf)
+
+# ---------------------------------------------------------------------------
 
 def start_client(message_body=None, log_callback=print):
     log_callback("[CLIENT] Starting Secure Client...")
@@ -20,8 +46,8 @@ def start_client(message_body=None, log_callback=print):
             s.connect((HOST, PORT))
             
             # 2. RSA Identity Exchange (Send Client Pub Key, Receive Server Pub Key)
-            s.sendall(client_public_pem)
-            server_rsa_pem = s.recv(1024)
+            send_msg(s, client_public_pem)
+            server_rsa_pem = recv_msg(s)
             server_rsa_key = crypto_utils.deserialize_public_key(server_rsa_pem)
             
             # MITM Protection: Display fingerprints
@@ -37,8 +63,8 @@ def start_client(message_body=None, log_callback=print):
             client_ec_pem = crypto_utils.serialize_ec_public_key(client_ec_pub)
             
             # Receive Server's EC Public Key + Signature
-            server_ec_pem = s.recv(1024)
-            server_ec_sig = s.recv(256)
+            server_ec_pem = recv_msg(s)
+            server_ec_sig = recv_msg(s)
             server_ec_pub = crypto_utils.deserialize_ec_public_key(server_ec_pem)
             
             # Verify Server's Identity
@@ -48,15 +74,12 @@ def start_client(message_body=None, log_callback=print):
 
             # Sign and Send Client's EC Public Key
             ec_signature = crypto_utils.sign_data(client_ec_pem, client_private_key)
-            s.sendall(client_ec_pem)
-            s.sendall(ec_signature)
+            send_msg(s, client_ec_pem)
+            send_msg(s, ec_signature)
             
             # Derive Session Key
             session_key = crypto_utils.derive_shared_aes_key(client_ec_priv, server_ec_pub)
             log_callback("[CLIENT] PFS Session Key derived via ECDHE.")
-
-            # Give server a moment to process
-            time.sleep(0.5)
 
             # 5. Prepare the Message (Data Payload)
             message_data = {
@@ -82,11 +105,11 @@ def start_client(message_body=None, log_callback=print):
                 "hash": computed_hash.hex(),
                 "signature": signature.hex()
             }
-            s.sendall(json.dumps(data_package).encode('utf-8'))
+            send_msg(s, json.dumps(data_package).encode('utf-8'))
             log_callback("[CLIENT] Encrypted message, hash, and signature sent to server.")
 
             # 10. Receive Acknowledgment
-            encrypted_ack = s.recv(1024)
+            encrypted_ack = recv_msg(s)
             if encrypted_ack:
                 ack_msg = crypto_utils.aes_decrypt(encrypted_ack, session_key)
                 log_callback(f"[CLIENT] Server Acknowledgment: {ack_msg.decode('utf-8')}")
