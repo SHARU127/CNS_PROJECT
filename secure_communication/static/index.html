@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Vault | Steganographic Secure Storage</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-ghost"></i>
+                <span>GHOST<span>VAULT</span></span>
+            </div>
+            <div class="nav-links">
+                <button class="nav-btn active" data-tab="forge">THE FORGE</button>
+                <button class="nav-btn" data-tab="oracle">THE ORACLE</button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- FORGE TAB: ENCODING -->
+        <section id="forge" class="tab-content active">
+            <div class="container">
+                <div class="section-header">
+                    <h1>REVEAL NOTHING</h1>
+                    <p>Conceal your secrets within the digital ether of an image.</p>
+                </div>
+
+                <div class="vault-grid">
+                    <div class="vault-panel upload-panel">
+                        <div class="panel-header">
+                            <i class="fas fa-image"></i>
+                            <span>CARRIER IMAGE</span>
+                        </div>
+                        <div class="drop-zone" id="encode-drop-zone">
+                            <input type="file" id="encode-image-input" accept="image/*" hidden>
+                            <div class="drop-zone-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag & Drop or Click to Upload</p>
+                                <span>Supports PNG, JPG, BMP</span>
+                            </div>
+                            <img id="encode-preview" class="preview-img hidden">
+                        </div>
+                    </div>
+
+                    <div class="vault-panel data-panel">
+                        <div class="panel-header">
+                            <i class="fas fa-file-shield"></i>
+                            <span>SECRET DATA</span>
+                        </div>
+                        <div class="input-group">
+                            <label>ENCRYPTION PASSWORD</label>
+                            <div class="pass-wrapper">
+                                <input type="password" id="encode-password" placeholder="Enter a strong key...">
+                                <i class="fas fa-eye-slash toggle-pass"></i>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>HIDDEN MESSAGE</label>
+                            <textarea id="encode-message" placeholder="Type the secret message here..."></textarea>
+                        </div>
+                        <button id="encode-btn" class="glow-btn">
+                            <i class="fas fa-bolt"></i> ENGRAVE INTO GHOST
+                        </button>
+                    </div>
+                </div>
+
+                <div id="encode-result" class="result-area hidden">
+                    <div class="success-banner">
+                        <i class="fas fa-check-circle"></i>
+                        <span>ENCODING COMPLETE</span>
+                    </div>
+                    <div class="result-actions">
+                        <button id="download-stego" class="action-btn">
+                            <i class="fas fa-download"></i> DOWNLOAD GHOST
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ORACLE TAB: DECODING -->
+        <section id="oracle" class="tab-content">
+            <div class="container">
+                <div class="section-header">
+                    <h1>SEEK THE TRUTH</h1>
+                    <p>Extract what is hidden beneath the visible surface.</p>
+                </div>
+
+                <div class="vault-grid">
+                    <div class="vault-panel upload-panel">
+                        <div class="panel-header">
+                            <i class="fas fa-ghost"></i>
+                            <span>GHOST IMAGE</span>
+                        </div>
+                        <div class="drop-zone" id="decode-drop-zone">
+                            <input type="file" id="decode-image-input" accept="image/*" hidden>
+                            <div class="drop-zone-content">
+                                <i class="fas fa-fingerprint"></i>
+                                <p>Drop the Ghost Image Here</p>
+                            </div>
+                            <img id="decode-preview" class="preview-img hidden">
+                        </div>
+                    </div>
+
+                    <div class="vault-panel data-panel">
+                        <div class="panel-header">
+                            <i class="fas fa-key"></i>
+                            <span>DECRYPTION</span>
+                        </div>
+                        <div class="input-group">
+                            <label>SECRET KEY</label>
+                            <div class="pass-wrapper">
+                                <input type="password" id="decode-password" placeholder="Enter the vault key...">
+                                <i class="fas fa-eye-slash toggle-pass"></i>
+                            </div>
+                        </div>
+                        <button id="decode-btn" class="glow-btn">
+                            <i class="fas fa-sparkles"></i> INVOKE THE ORACLE
+                        </button>
+                    </div>
+                </div>
+
+                <div id="decode-result" class="result-area hidden">
+                    <div class="success-banner">
+                        <i class="fas fa-unlock-alt"></i>
+                        <span>REVEALED MESSAGE</span>
+                    </div>
+                    <div class="revealed-message">
+                        <pre id="decoded-message-text"></pre>
+                        <button id="copy-btn" class="icon-btn" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="loading-overlay" class="hidden">
+        <div class="loader">
+            <div class="ghost-loader">
+                <i class="fas fa-ghost"></i>
+            </div>
+            <p id="loader-text">Processing digital residue...</p>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
