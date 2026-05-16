@@ -18,22 +18,133 @@
                 <span>GHOST<span>VAULT</span></span>
             </div>
             <div class="nav-links">
-                <button class="nav-btn active" data-tab="forge">THE FORGE</button>
-                <button class="nav-btn" data-tab="oracle">THE ORACLE</button>
+                <button class="nav-btn" data-tab="keyvault" id="nav-keyvault">
+                    <i class="fas fa-key"></i> KEY VAULT
+                </button>
+                <button class="nav-btn active" data-tab="forge" id="nav-forge">
+                    <i class="fas fa-fire"></i> THE FORGE
+                </button>
+                <button class="nav-btn" data-tab="oracle" id="nav-oracle">
+                    <i class="fas fa-eye"></i> THE ORACLE
+                </button>
             </div>
         </div>
     </nav>
 
     <main>
-        <!-- FORGE TAB: ENCODING -->
+
+        <!-- ================================================================
+             KEY VAULT TAB — Generate RSA Key Pair
+             ================================================================ -->
+        <section id="keyvault" class="tab-content">
+            <div class="container">
+                <div class="section-header">
+                    <h1>KEY VAULT</h1>
+                    <p>Generate your RSA identity. Share only the public key.</p>
+                    <div class="algo-badge">
+                        <i class="fas fa-microchip"></i>
+                        RSA-2048 key pair &mdash; algorithm-generated, zero password required
+                    </div>
+                </div>
+
+                <!-- How it works explainer -->
+                <div class="explainer-grid">
+                    <div class="explainer-card">
+                        <div class="explainer-icon" style="background: rgba(112,0,255,0.15); border-color: rgba(112,0,255,0.4);">
+                            <i class="fas fa-share-alt" style="color:#7000ff;"></i>
+                        </div>
+                        <h3>PUBLIC KEY</h3>
+                        <p>Share this freely with anyone who wants to send you a secret Ghost image. It cannot be used to decrypt.</p>
+                    </div>
+                    <div class="explainer-card">
+                        <div class="explainer-icon" style="background: rgba(0,242,255,0.1); border-color: rgba(0,242,255,0.35);">
+                            <i class="fas fa-lock" style="color:#00f2ff;"></i>
+                        </div>
+                        <h3>PRIVATE KEY</h3>
+                        <p>Keep this secret. Only you hold it. The Oracle uses it to unlock Ghost images — it never leaves your machine.</p>
+                    </div>
+                    <div class="explainer-card">
+                        <div class="explainer-icon" style="background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3);">
+                            <i class="fas fa-shield-halved" style="color:#00ff88;"></i>
+                        </div>
+                        <h3>NO SHARED SECRET</h3>
+                        <p>No password is ever exchanged. The algorithm generates and wraps the AES key automatically using asymmetric cryptography.</p>
+                    </div>
+                </div>
+
+                <div class="keygen-panel">
+                    <button id="keygen-btn" class="glow-btn keygen-glow-btn">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        GENERATE MY KEY PAIR
+                    </button>
+                </div>
+
+                <div id="keygen-result" class="result-area hidden">
+                    <div class="success-banner">
+                        <i class="fas fa-check-circle"></i>
+                        <span>RSA-2048 KEY PAIR GENERATED</span>
+                    </div>
+
+                    <div class="fingerprint-row">
+                        <i class="fas fa-fingerprint"></i>
+                        <span>Fingerprint:</span>
+                        <code id="key-fingerprint"></code>
+                    </div>
+
+                    <div class="key-download-grid">
+                        <div class="key-download-card public-card">
+                            <div class="kd-header">
+                                <i class="fas fa-share-alt"></i>
+                                <span>PUBLIC KEY</span>
+                                <span class="kd-hint">Share freely</span>
+                            </div>
+                            <p>Give this to anyone who needs to forge a Ghost image for you.</p>
+                            <button id="download-pubkey" class="action-btn pub-btn">
+                                <i class="fas fa-download"></i> DOWNLOAD ghost_public.pem
+                            </button>
+                        </div>
+                        <div class="key-download-card private-card">
+                            <div class="kd-header">
+                                <i class="fas fa-lock"></i>
+                                <span>PRIVATE KEY</span>
+                                <span class="kd-hint danger-hint">Keep secret</span>
+                            </div>
+                            <p>Store this securely. Load it into the Oracle to reveal hidden messages.</p>
+                            <button id="download-privkey" class="action-btn priv-btn">
+                                <i class="fas fa-download"></i> DOWNLOAD ghost_private.pem
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             FORGE TAB — Encode with recipient's public key
+             ================================================================ -->
         <section id="forge" class="tab-content active">
             <div class="container">
                 <div class="section-header">
-                    <h1>REVEAL NOTHING</h1>
-                    <p>Conceal your secrets within the digital ether of an image.</p>
+                    <h1>THE FORGE</h1>
+                    <p>Seal your secret. Only the keyholder can reveal it.</p>
+                    <div class="algo-badge">
+                        <i class="fas fa-microchip"></i>
+                        AES-256 session key wrapped with recipient&apos;s RSA-2048 public key
+                    </div>
                 </div>
 
-                <div class="vault-grid">
+                <div class="flow-steps">
+                    <div class="flow-step"><span>1</span> Upload carrier image</div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step"><span>2</span> Load recipient&apos;s public key</div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step"><span>3</span> Type secret message</div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step"><span>4</span> Download Ghost image</div>
+                </div>
+
+                <div class="vault-grid forge-grid">
+                    <!-- Carrier image -->
                     <div class="vault-panel upload-panel">
                         <div class="panel-header">
                             <i class="fas fa-image"></i>
@@ -43,29 +154,43 @@
                             <input type="file" id="encode-image-input" accept="image/*" hidden>
                             <div class="drop-zone-content">
                                 <i class="fas fa-cloud-upload-alt"></i>
-                                <p>Drag & Drop or Click to Upload</p>
-                                <span>Supports PNG, JPG, BMP</span>
+                                <p>Drag &amp; Drop or Click to Upload</p>
+                                <span>PNG, JPG, BMP</span>
                             </div>
                             <img id="encode-preview" class="preview-img hidden">
                         </div>
                     </div>
 
+                    <!-- Secret data + public key upload -->
                     <div class="vault-panel data-panel">
                         <div class="panel-header">
                             <i class="fas fa-file-shield"></i>
                             <span>SECRET DATA</span>
                         </div>
+
+                        <!-- Recipient public key upload -->
                         <div class="input-group">
-                            <label>ENCRYPTION PASSWORD</label>
-                            <div class="pass-wrapper">
-                                <input type="password" id="encode-password" placeholder="Enter a strong key...">
-                                <i class="fas fa-eye-slash toggle-pass"></i>
+                            <label>RECIPIENT&apos;S PUBLIC KEY</label>
+                            <div class="file-drop-row" id="pubkey-drop-row">
+                                <input type="file" id="encode-pubkey-input" accept=".pem" hidden>
+                                <div class="file-drop-inner" id="pubkey-drop-trigger">
+                                    <i class="fas fa-file-import"></i>
+                                    <span id="pubkey-filename">Click or drop ghost_public.pem</span>
+                                </div>
+                                <div id="pubkey-ok" class="file-ok hidden">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="pubkey-ok-name"></span>
+                                </div>
                             </div>
+                            <p class="field-hint">The recipient generates this from the Key Vault tab.</p>
                         </div>
+
+                        <!-- Secret message -->
                         <div class="input-group">
                             <label>HIDDEN MESSAGE</label>
                             <textarea id="encode-message" placeholder="Type the secret message here..."></textarea>
                         </div>
+
                         <button id="encode-btn" class="glow-btn">
                             <i class="fas fa-bolt"></i> ENGRAVE INTO GHOST
                         </button>
@@ -75,26 +200,46 @@
                 <div id="encode-result" class="result-area hidden">
                     <div class="success-banner">
                         <i class="fas fa-check-circle"></i>
-                        <span>ENCODING COMPLETE</span>
+                        <span>GHOST FORGED SUCCESSFULLY</span>
                     </div>
+                    <p class="encode-result-hint">
+                        <i class="fas fa-info-circle"></i>
+                        The AES-256 key was generated by the algorithm and sealed inside the image using the recipient&apos;s RSA public key.
+                        <strong>No key needs to be shared.</strong> Send the Ghost image openly — only the matching private key can reveal its secret.
+                    </p>
                     <div class="result-actions">
                         <button id="download-stego" class="action-btn">
-                            <i class="fas fa-download"></i> DOWNLOAD GHOST
+                            <i class="fas fa-download"></i> DOWNLOAD GHOST IMAGE
                         </button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ORACLE TAB: DECODING -->
+        <!-- ================================================================
+             ORACLE TAB — Decode with private key
+             ================================================================ -->
         <section id="oracle" class="tab-content">
             <div class="container">
                 <div class="section-header">
-                    <h1>SEEK THE TRUTH</h1>
-                    <p>Extract what is hidden beneath the visible surface.</p>
+                    <h1>THE ORACLE</h1>
+                    <p>Your private key unlocks what was sealed for you alone.</p>
+                    <div class="algo-badge">
+                        <i class="fas fa-microchip"></i>
+                        RSA-2048 private key decrypts the hidden AES-256 session key
+                    </div>
+                </div>
+
+                <div class="flow-steps">
+                    <div class="flow-step"><span>1</span> Upload Ghost image</div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step"><span>2</span> Load your private key</div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step"><span>3</span> Reveal secret message</div>
                 </div>
 
                 <div class="vault-grid">
+                    <!-- Ghost image -->
                     <div class="vault-panel upload-panel">
                         <div class="panel-header">
                             <i class="fas fa-ghost"></i>
@@ -110,20 +255,31 @@
                         </div>
                     </div>
 
+                    <!-- Private key upload -->
                     <div class="vault-panel data-panel">
                         <div class="panel-header">
                             <i class="fas fa-key"></i>
-                            <span>DECRYPTION</span>
+                            <span>YOUR PRIVATE KEY</span>
                         </div>
+
                         <div class="input-group">
-                            <label>SECRET KEY</label>
-                            <div class="pass-wrapper">
-                                <input type="password" id="decode-password" placeholder="Enter the vault key...">
-                                <i class="fas fa-eye-slash toggle-pass"></i>
+                            <label>PRIVATE KEY FILE</label>
+                            <div class="file-drop-row" id="privkey-drop-row">
+                                <input type="file" id="decode-privkey-input" accept=".pem" hidden>
+                                <div class="file-drop-inner" id="privkey-drop-trigger">
+                                    <i class="fas fa-file-import"></i>
+                                    <span id="privkey-filename">Click or drop ghost_private.pem</span>
+                                </div>
+                                <div id="privkey-ok" class="file-ok hidden">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="privkey-ok-name"></span>
+                                </div>
                             </div>
+                            <p class="field-hint">Load the private key from your Key Vault. It never leaves your machine.</p>
                         </div>
-                        <button id="decode-btn" class="glow-btn">
-                            <i class="fas fa-sparkles"></i> INVOKE THE ORACLE
+
+                        <button id="decode-btn" class="glow-btn oracle-glow-btn">
+                            <i class="fas fa-eye"></i> INVOKE THE ORACLE
                         </button>
                     </div>
                 </div>
@@ -131,7 +287,7 @@
                 <div id="decode-result" class="result-area hidden">
                     <div class="success-banner">
                         <i class="fas fa-unlock-alt"></i>
-                        <span>REVEALED MESSAGE</span>
+                        <span>SECRET REVEALED</span>
                     </div>
                     <div class="revealed-message">
                         <pre id="decoded-message-text"></pre>
